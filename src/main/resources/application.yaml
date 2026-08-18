@@ -11,3 +11,7 @@ logging:
       codewithNishu:
         ecom_order_service:
              client:        DEBUG
+eureka:
+ client:
+   register-with-eureka: true
+   fetch-registry: true
