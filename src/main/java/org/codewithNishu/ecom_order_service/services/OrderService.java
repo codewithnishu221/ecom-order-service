@@ -1,13 +1,16 @@
 package org.codewithNishu.ecom_order_service.services;
 
+import java.net.URI;
+import java.util.List;
+
 import org.codewithNishu.ecom_order_service.client.InventoryClient;
 import org.codewithNishu.ecom_order_service.dto.Inventory;
-import org.codewithNishu.ecom_order_service.exceptions.MyCustomRuntimeException;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
+
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.ServiceInstance;
 
 @Service
 public class OrderService {
@@ -15,13 +18,19 @@ public class OrderService {
     private final RestTemplate restTemplate;
     private final RestClient restClient;
     private final InventoryClient inventoryClient;
-    public OrderService(RestTemplate restTemplate, RestClient restClient, InventoryClient inventoryClient){
+    private final DiscoveryClient discoveryClient; // if we want use eureka service in rest client and rest template because feign is directly try to find the eureka server 
+    public OrderService(RestTemplate restTemplate, RestClient restClient, InventoryClient inventoryClient, DiscoveryClient discoveryClient){
         this.inventoryClient = inventoryClient;
         this.restTemplate = restTemplate;
         this.restClient = restClient;
+        this.discoveryClient = discoveryClient;
     }
 
     public String placeOrder(Long productId){
+        // if we want to use the rest client & rest template we need to use the discovery client for connect with eureka server and there is an issue with if we have multiple endpoints and we add 0th endpoint then for all request we are getting the 1st url and to resolve this we need to handle the manual load balancer here that is the problem whihc is solved by the feign client so no need to doing this all things 
+    //    List<ServiceInstance> instances = discoveryClient.getInstances("ecom-inventory-service");
+    //    ServiceInstance serviceInstance =instances.get(0);
+    //    URI uri = serviceInstance.getUri();
          // Rest teplate is deprecated by Spring new way is rest Clinet for inter service communication from one service to another service
     //    String response =  restTemplate.getForObject("http://localhost:8081/inventory/" + productId, String.class);
     //    return "IN STOCK".equals(response) ? "Order placed Successfully": "Product out of stock";
