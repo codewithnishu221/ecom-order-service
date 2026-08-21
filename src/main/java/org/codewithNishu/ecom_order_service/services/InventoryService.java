@@ -6,6 +6,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+
 @Service
 public class InventoryService {
 
@@ -19,8 +21,13 @@ public class InventoryService {
         maxAttempts = 3,
         backoff = @Backoff(delay = 2000)
     )
+    @RateLimiter(name = "inventoryService", fallbackMethod="fallbackMethod")
     public Inventory getInventory(Long productId){
         System.out.println("Calling Inventory Service for ProductId: "+ productId);
         return inventoryClient.getInventory(productId);
+    }
+    public Inventory fallbackMethod(Long productId, Throwable Throwable){
+        System.out.println("Fallback method called for productId: "+ productId);
+        return new Inventory(productId, 0);
     }
 }

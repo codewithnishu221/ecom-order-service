@@ -24,3 +24,11 @@ eureka:
      defaultZone: http://localhost:8761/eureka
  instance:
     lease-renewal-interval-in-seconds: 5
+
+resilience4j:
+  ratelimiter:
+    instances:
+      inventoryService:
+        limit-for-period: 2 # 2 requests per 10 seconds meaning of these  configurations
+        limit-refresh-period: 10s # 10 seconds to refresh limits
+        timeout-duration: 0s # if the request is rejected how much time do i wait for particuler connection , using 0 we are immediatly reject the extra requests  
