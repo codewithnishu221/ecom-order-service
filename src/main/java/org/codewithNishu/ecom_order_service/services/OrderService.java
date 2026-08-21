@@ -1,7 +1,5 @@
 package org.codewithNishu.ecom_order_service.services;
 
-import java.net.URI;
-import java.util.List;
 
 import org.codewithNishu.ecom_order_service.client.InventoryClient;
 import org.codewithNishu.ecom_order_service.dto.Inventory;
@@ -10,20 +8,20 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.ServiceInstance;
-
 @Service
 public class OrderService {
 
     private final RestTemplate restTemplate;
     private final RestClient restClient;
     private final InventoryClient inventoryClient;
+    private final InventoryService inventoryService;
     private final DiscoveryClient discoveryClient; // if we want use eureka service in rest client and rest template because feign is directly try to find the eureka server 
-    public OrderService(RestTemplate restTemplate, RestClient restClient, InventoryClient inventoryClient, DiscoveryClient discoveryClient){
+    public OrderService(RestTemplate restTemplate, RestClient restClient, InventoryClient inventoryClient, DiscoveryClient discoveryClient, InventoryService inventoryService){
         this.inventoryClient = inventoryClient;
         this.restTemplate = restTemplate;
         this.restClient = restClient;
         this.discoveryClient = discoveryClient;
+        this.inventoryService = inventoryService;
     }
 
     public String placeOrder(Long productId){
@@ -47,7 +45,7 @@ public class OrderService {
         updateInventory(entity.getBody());
        return entity.getBody()!= null && entity.getBody().getQuantity()>0 ? "Order placed Successfully": "Product out of stock";*/
        // Call inventory service to get inventory using feign client 
-       Inventory inventory = inventoryClient.getInventory(productId);
+       Inventory inventory = inventoryService.getInventory(productId);
        int quantity = inventory.getQuantity();
        updateInventory(inventory);
        return quantity>0 ?
