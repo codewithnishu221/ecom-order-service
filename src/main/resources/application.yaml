@@ -32,3 +32,23 @@ resilience4j:
         limit-for-period: 2 # 2 requests per 10 seconds meaning of these  configurations
         limit-refresh-period: 10s # 10 seconds to refresh limits
         timeout-duration: 0s # if the request is rejected how much time do i wait for particuler connection , using 0 we are immediatly reject the extra requests  
+  circuitbreaker:
+    instances:
+    # our circuitBreaker instance name
+      inventoryServiceCircuitBreaker:
+        # waht kind of window we used for open the cicuit breaker like- time_BASED or count based
+        sliding-window-type: COUNT_BASED
+        # how much request of that particuler window we check how much request at least - 6
+        sliding-window-size: 6
+        # how much request are failed we will not consider like if after 1 call our request is failed then we move on circuit breaker 
+        minimum-number-of-calls: 4
+        # failure threshold hou much window request size request failed like 50% request failed 
+        failure-rate-threshold: 50
+
+        # how much time we will not accept new request like we are in circuit breaker for 10 and we will not accept any new request fro next 10s
+        wait-duration-in-open-state: 10s
+        #Half-open configuration after 10s our circuit break from open state , to transfer into half-state and this half state is checked maximum 3 request will be passing in 5s if they passed then circuit kove on the close state , 
+        permitted-number-of-calls-in-half-open-state: 3
+       #so inside the half sate how much calls we are verified to pass is 3 and wait inside the half-state is 5s and we can move from open to half-open state is true
+        max-wait-duration-in-half-open-state: 5s
+        automatic-transition-from-open-to-half-open-enabled: true
