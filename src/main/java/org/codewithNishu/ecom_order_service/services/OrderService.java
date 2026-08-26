@@ -45,7 +45,7 @@ public class OrderService {
         updateInventory(entity.getBody());
        return entity.getBody()!= null && entity.getBody().getQuantity()>0 ? "Order placed Successfully": "Product out of stock";*/
        // Call inventory service to get inventory using feign client 
-       Inventory inventory = inventoryService.getInventory(productId);
+       Inventory inventory = inventoryService.getInventory(productId).join();
        int quantity = inventory.getQuantity();
        updateInventory(inventory);
        return quantity>0 ?

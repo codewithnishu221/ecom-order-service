@@ -52,3 +52,9 @@ resilience4j:
        #so inside the half sate how much calls we are verified to pass is 3 and wait inside the half-state is 5s and we can move from open to half-open state is true
         max-wait-duration-in-half-open-state: 5s
         automatic-transition-from-open-to-half-open-enabled: true
+
+  timelimiter:
+    instances:
+      inventoryServiceTimeLimiter: # name of my rate
+        timeout-duration: 2s
+        cancel-running-future: true
