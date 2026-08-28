@@ -8,6 +8,9 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+
+import java.util.concurrent.ExecutionException;
+
 @Service
 public class OrderService {
 
@@ -24,7 +27,7 @@ public class OrderService {
         this.inventoryService = inventoryService;
     }
 
-    public String placeOrder(Long productId){
+    public String placeOrder(Long productId) throws ExecutionException, InterruptedException {
         // if we want to use the rest client & rest template we need to use the discovery client for connect with eureka server and there is an issue with if we have multiple endpoints and we add 0th endpoint then for all request we are getting the 1st url and to resolve this we need to handle the manual load balancer here that is the problem whihc is solved by the feign client so no need to doing this all things 
     //    List<ServiceInstance> instances = discoveryClient.getInstances("ecom-inventory-service");
     //    ServiceInstance serviceInstance =instances.get(0);
@@ -45,8 +48,9 @@ public class OrderService {
         updateInventory(entity.getBody());
        return entity.getBody()!= null && entity.getBody().getQuantity()>0 ? "Order placed Successfully": "Product out of stock";*/
        // Call inventory service to get inventory using feign client 
-       Inventory inventory = inventoryService.getInventory(productId).join();
-       int quantity = inventory.getQuantity();
+//       Inventory inventory = inventoryService.getInventory(productId).join();// .join() is part of completableFuture method for time limiter
+        Inventory inventory = inventoryService.getInventory(productId).get();
+        int quantity = inventory.getQuantity();
        updateInventory(inventory);
        return quantity>0 ?
        "Order placed Successfully": "Product out of stock";
@@ -68,6 +72,9 @@ public class OrderService {
     }
 
     private void updateInventory(Inventory inventory){
+      if(inventory.getQuantity() <= 0){
+          return;
+      }
        inventory.setQuantity(inventory.getQuantity()-1);
        // here is the feign client interservice communication
        inventoryClient.updatedInventory(inventory);
